@@ -1,8 +1,8 @@
 /**
  * Before running this file,
- * 1. Please use the provided docker-compose file to initiate the Iroha + Postgres environment
- * 2. `yarn install` to install packages
- * 3. You might have to wait ~ 35 seconds for the Iroha container to be ready.
+ * 1. `yarn install` to install packages
+ * 2. Please use the provided docker-compose file to initiate the Iroha + Postgres environment
+ * 3. You have to wait ~ 35 seconds for the Iroha container to be ready.
  * 4. Then, run this script with: `yarn build && npx ts-node example/chain.ts`
  * @see https://github.com/hyperledger/iroha-javascript
  */
@@ -55,39 +55,29 @@ const queryOptions = {
   timeoutLimit: 5000,
 };
 
-//Add the second public key(signature) to 'admin@test' account
-commands
-  .addSignatory(commandOptions, {
+//the setup
+const firstTx = new TxBuilder()
+  .addSignatory({
     accountId: "admin@test",
     publicKey:
       "716fe505f69f18511a1b083915aa9ff73ef36e6688199f3959750db38b8f4bfc",
   })
-  .then((res: any) => {
-    console.log(
-      "If you see undefined, it actually means the signature is added due to the issue with the original JS lib"
-    );
-    return console.log(res);
-  })
-  .catch((err) => {
-    return console.log(err);
-  });
+  .addMeta("admin@test", 1).tx;
 
-//With the extra public key(signature), we can set the quorum of 'admin@test' to 2
-commands
-  .setAccountQuorum(commandOptions, {
+const secondTx = new TxBuilder()
+  .setAccountQuorum({
     accountId: "admin@test",
     quorum: 2,
   })
-  .then((res: any) => {
-    console.log(
-      "If you see undefined, it actually means the quorum is changed to 2 due to the issue with the original JS lib"
-    );
-    console.log("Now the code will get stuck.");
-    return console.log(res);
-  })
-  .catch((err) => {
-    return console.log(err);
-  });
+  .addMeta("admin@test", 1).tx;
+
+new BatchBuilder([firstTx, secondTx])
+  .setBatchMeta(0)
+  .sign([adminPriv], 0)
+  .sign([adminPriv], 1)
+  .send(commandService)
+  .then((res) => console.log(res))
+  .catch((err) => console.error(err));
 
 /** Let's do a pending transaction. Note that we pass in commandOptions2(quorum=2, but only 1 signature/priv key)
  * This leads to a pending transaction due to insufficient no. of signatures according to Iroha's doc:
