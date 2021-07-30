@@ -1,0 +1,37 @@
+version: '3'
+
+services:
+
+    node:
+        image: hanxyz/iroha:1.20f
+        ports:
+            - "50051:50051"
+        networks:
+            - iroha-network
+        environment: 
+            - IROHA_POSTGRES_HOST=postgres_1
+            - IROHA_POSTGRES_PORT=5432
+            - IROHA_POSTGRES_USER=postgres
+            - IROHA_POSTGRES_PASSWORD=mysecretpassword
+            - KEY=node0
+        depends_on:
+            - some-postgres
+        volumes:
+            - blockstore:/tmp/block_store:delegated    
+
+    some-postgres:
+        image: postgres:9.5-alpine
+        container_name: some_postgres
+        networks:
+            - iroha-network        
+        ports: 
+            - "5432:5432"
+        environment:
+            - POSTGRES_USER=postgres
+            - POSTGRES_PASSWORD=mysecretpassword            
+        
+networks: 
+    iroha-network: 
+
+volumes:
+    blockstore:
