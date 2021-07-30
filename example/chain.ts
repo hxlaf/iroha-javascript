@@ -56,7 +56,7 @@ const queryOptions = {
 };
 
 //the setup
-const firstTx = new TxBuilder()
+const firstTx = new TxBuilder() //Add the second public key(signature) to 'admin@test' account
   .addSignatory({
     accountId: "admin@test",
     publicKey:
@@ -64,7 +64,7 @@ const firstTx = new TxBuilder()
   })
   .addMeta("admin@test", 1).tx;
 
-const secondTx = new TxBuilder()
+const secondTx = new TxBuilder() //With the extra public key(signature), we can set the quorum of 'admin@test' to 2
   .setAccountQuorum({
     accountId: "admin@test",
     quorum: 2,
