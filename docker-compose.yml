@@ -1,15 +1,14 @@
-version: '3'
+version: "3"
 
 services:
-
     node:
-        image: hanxyz/iroha:1.20f
+        image: ghcr.io/hyperledger/cactus-iroha-all-in-one:2021-08-16--1183
         ports:
             - "50051:50051"
         networks:
             - iroha-network
-        environment: 
-            - IROHA_POSTGRES_HOST=postgres_1
+        environment:
+            - IROHA_POSTGRES_HOST=some_postgres
             - IROHA_POSTGRES_PORT=5432
             - IROHA_POSTGRES_USER=postgres
             - IROHA_POSTGRES_PASSWORD=mysecretpassword
@@ -17,21 +16,21 @@ services:
         depends_on:
             - some-postgres
         volumes:
-            - blockstore:/tmp/block_store:delegated    
+            - blockstore:/tmp/block_store:delegated
 
     some-postgres:
         image: postgres:9.5-alpine
         container_name: some_postgres
         networks:
-            - iroha-network        
-        ports: 
+            - iroha-network
+        ports:
             - "5432:5432"
         environment:
             - POSTGRES_USER=postgres
-            - POSTGRES_PASSWORD=mysecretpassword            
-        
-networks: 
-    iroha-network: 
+            - POSTGRES_PASSWORD=mysecretpassword
+
+networks:
+    iroha-network:
 
 volumes:
     blockstore:
